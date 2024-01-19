@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="login.css">
+  <script src="index.js" crossorigin="anonymous" defer></script>
+  <title>Login site</title>
+</head>
+
+<body>
+  <div id="cd"></div>
+  <div id="not-cd">
+    <div class="loginheader">
+      <h2>Log in to FIT Learning Management System</h2>
+    </div>
+
+
+    <form id="login-form">
+      <div class="imgcontainer">
+        <img src="./image/logo.png" alt="Avatar" class="imglogo">
+      </div>
+
+      <div class="container">
+        <label for="uname"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="uname" required>
+
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" required>
+
+
+        <label>
+          <input type="checkbox" checked="checked" name="remember"> Remember me
+        </label>
+      </div>
+
+      <div class="container" style="background-color:#f1f1f1">
+        <span class="psw">Forgot <a href="#">password?</a></span>
+      </div>
+    </form>
+    <button type="submit" id="login-btn">Login</button>
+  </div>
+
+
+  <script>
+    const form_login = document.getElementById('login-form')
+    const login_button = document.getElementById('login-btn')
+    login_button.onclick = function () {
+      let name = form_login['uname'].value
+      let password = form_login['psw'].value
+
+      if (name.length < 6) {
+        return alert('Student Name must be longer than 6')
+      }
+
+      if (password.length < 6) {
+        return alert('Password must be longer than 6')
+      }
+      fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }, body: JSON.stringify({
+          student_name: name,
+          password: password
+        }),
+      }).then(res => res.json())
+        .then(a => {
+          if (a == 'Login Success') {
+            let s = 3;
+            let t = setInterval(function () {
+              if (s == 0) {
+                document.getElementById('cd').textContent = 'Redirecting...';
+                clearInterval(t);
+                setTimeout(() => {
+                  window.location.href = 'mycourses.html';
+                }, 2000);
+              } else {
+                document.getElementById('cd').textContent = s;
+                s--;
+              }
+            }, 1000);
+
+          }
+          else {
+            alert(a)
+          }
+
+        }).catch((error) => {
+          console.log(error);
+        });
+
+    }
+  </script>
+</body>
+
+</html>

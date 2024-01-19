@@ -1,0 +1,13 @@
+.preloader{
+    width: 50px;
+    height: 50px;
+    border: 3px solid red;
+    border-radius: 50%;
+    border-top: 3px solid red;
+    animation: spin 3.5s infinite;
+    position: absolute; top: 50%;left: 50%;
+}
+@keyframes spin{
+    0% {transform: rotate(0deg)}
+    100% {transform: rotate(360deg)}
+}

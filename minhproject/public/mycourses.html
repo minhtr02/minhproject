@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanoi University - Learning Management System</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Play&display=swap" rel="stylesheet">
+    <script src="/index.js" crossorigin="anonymous" defer></script>
+</head>
+
+
+<body>
+    <div class="preloader"></div>
+
+
+    <div class="container">
+        <header>
+            <div class="logoheader">
+                <img src="./image/logo.png" alt="Hanoiuniversity Logo">
+                <h2>HANOI UNIVERSITY</h2>
+                <p>INFORMATION TECHNOLOGY FACULTY</p>
+            </div>
+
+            <nav>
+                <div class="menu">
+                    <ul>
+                        <ul>
+                            <li id="button_login"><a href="login.html">Log in</a></li>
+                            <li id="button_register"><a href="register.html" >Register</a></li>
+                            <li id="button_logout"><a href="#" id="log-out">Log out</a></li>
+                            <li><a href="allcourses.html">All Courses</a></li>
+                            <li><a href="mycourses.html">My Courses</a></li>
+                            <li><a href="/">Announcements</a></li>
+                        </ul>
+                    </ul>
+
+                </div>
+
+                <div class="searchbar">
+                    <input type="Search" placeholder=" Search your courses.....">
+                    <button>Search</button>
+
+                </div>
+            </nav>
+        </header>
+    </div>
+
+    <div id="sc"><h3>You need login to view</h3></div>
+    <div class="body-app" id="app" >
+        <div id ="list-my-courses"></div>
+        
+    </div>
+
+    <footer>
+        <div class="footer">
+            <div class="row">
+                <a href="#"><i class="fa fa-facebook"></i></a>
+                <a href="#"><i class="fa fa-instagram"></i></a>
+                <a href="#"><i class="fa fa-youtube"></i></a>
+                <a href="#"><i class="fa fa-twitter"></i></a>
+            </div>
+
+            <div class="row">
+                <ul>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">Our Services</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Career</a></li>
+                </ul>
+            </div>
+
+            <div class="row">
+                ©2022 Faculty of Information Technology - Hanoi University
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const list_courses = document.getElementById('list-my-courses')
+        fetch('http://localhost:3000/api/my/courses', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(res => res.json())
+            .then(courses => {
+                let list = ``
+                courses.forEach(c => {
+                    let id_unenroll = 'u_' + c.id
+                    let id_join = 'j_' + c.id
+                    let div = `<div class="course">
+                    <div class="course-title">
+                    <span>${c.course_name}</span>
+                    </div>
+                    <div>
+                        <button class="btn-unenroll" id="${id_unenroll}" onclick="Unenroll(${c.id})">Unenroll</button>
+                        <button class="btn-join" id="${id_join}" onclick="Join(${c.id})">Join</button>
+                    </div>
+                    </div>`
+                    list += div
+                });
+                list_courses.innerHTML = list
+
+            }).catch((error) => {
+                console.log(error);
+            });
+            
+        function setCookie(cname, cvalue, exdays) {
+            const d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            let expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function Unenroll(course_id) {
+            fetch('http://localhost:3000/api/my/courses/unenroll', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }, body: JSON.stringify({
+                    course_id: course_id,
+                }),
+            }).then(res => res.json())
+                .then(alert => {
+                    let x = document.getElementById('u_' + course_id)
+                    let y = document.getElementById('j_' + course_id)
+                    y.style.display = 'none'
+                    x.innerHTML = alert
+                    x.style.backgroundColor = '#889688'
+                    x.disabled = true
+                }).catch((error) => {
+                    console.log(error);
+                });
+        }
+
+        function Join(course_id) {
+            setCookie('course_id', course_id, 1)
+            window.location.href = 'coursepage.html'
+        }
+    </script>
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanoi University - Learning Management System</title>
+    <link rel="stylesheet" href="/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Play&display=swap" rel="stylesheet">
+    <script src="/index.js" crossorigin="anonymous" defer></script>
+</head>
+
+<body>
+    <div class="preloader"></div>
+
+
+    <div class="container">
+        <header>
+            <div class="logoheader">
+                <img src="/image/logo.png" alt="Hanoiuniversity Logo">
+                <h2>HANOI UNIVERSITY</h2>
+                <p>INFORMATION TECHNOLOGY FACULTY</p>
+            </div>
+
+            <nav>
+                <div class="menu">
+                    <ul>
+                        <ul>
+                            <li id="button_login"><a href="login.html">Log in</a></li>
+                            <li id="button_register"><a href="register.html">Register</a></li>
+                            <li id="button_logout"><a href="#" id="log-out">Log out</a></li>
+                            <li><a href="allcourses.html">All Courses</a></li>
+                            <li><a href="mycourses.html">My Courses</a></li>
+                            <li><a href="/">Announcements</a></li>
+                        </ul>
+                    </ul>
+
+                </div>
+
+                <div class="searchbar">
+                    <input type="Search" placeholder=" Search your courses.....">
+                    <button>Search</button>
+
+                </div>
+            </nav>
+        </header>
+    </div>
+
+    <div style="display: flex; justify-content: center; padding-top: 20px; color: brown; width: 100%;">
+        <h4 style="margin-bottom: 10px;">Quiz Attempt</h4>
+
+    </div>
+
+    <div style="display: flex; justify-content: center; color: #0a08dc;">
+
+        <div id="score"></div>
+    </div>
+    <div id="sc">
+        <h3>You need login to view</h3>
+    </div>
+    <div class="body-app">
+        <div id="list-questions"></div>
+
+    </div>
+    <div style="display: flex; justify-content: center; padding-top: 20px; color: brown;"><button class="btn-join"
+            id="submit-quiz">Submit</button></div>
+    <footer>
+        <div class="footer">
+            <div class="row">
+                <a href="#"><i class="fa fa-facebook"></i></a>
+                <a href="#"><i class="fa fa-instagram"></i></a>
+                <a href="#"><i class="fa fa-youtube"></i></a>
+                <a href="#"><i class="fa fa-twitter"></i></a>
+            </div>
+
+            <div class="row">
+                <ul>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">Our Services</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Career</a></li>
+                </ul>
+            </div>
+
+            <div class="row">
+                ©2022 Faculty of Information Technology - Hanoi University
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        function getCk(cookie) {
+            let name = cookie + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        };
+        const quiz_id = getCk('quiz_id')
+        const course_id = getCk('course_id')
+        fetch('http://localhost:3000/api/course/' + course_id + '/doquiz/' + quiz_id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(res => res.json())
+            .then(questions => {
+                let list_questions = document.getElementById('list-questions');
+                let list_user_answer = [];
+                questions.forEach((question, index) => {
+                    const div = document.createElement('div');
+                    div.style.padding = '10px'
+                    const h3 = document.createElement('h3');
+                    h3.classList.add('question-x')
+                    const span = document.createElement('span');
+                    span.style.wordBreak = 'break-all';
+
+                    span.innerHTML = 'Question ' + (index + 1) + ': ' + question.question;
+                    const list_group = document.createElement('div');
+                    list_group.classList.add('choices')
+                    question.choices.forEach((c, index) => {
+                        const list_group_item = document.createElement('li');
+                        list_group_item.style.listStyle = 'none'
+                        const input = document.createElement('input');
+                        input.style.marginRight = '10px'
+                        input.setAttribute('type', 'radio');
+                        input.setAttribute('value', index);
+                        input.setAttribute('name', 'q-' + question.id);
+                        input.setAttribute('id', 'q-' + question.id + '-' + index);
+                        input.onclick = ((e) => {
+                            let user_choices = {
+                                question_id: question.id,
+                                user_answer: e.target.value
+                            }
+                            list_user_answer.push(user_choices);
+                        })
+                        const label = document.createElement('label');
+
+                        label.setAttribute('for', 'q-' + question.id + '-' + index);
+                        label.innerHTML = c;
+
+                        list_group_item.appendChild(input);
+                        list_group_item.appendChild(label);
+                        list_group.appendChild(list_group_item);
+                    });
+
+                    h3.appendChild(span);
+                    div.appendChild(h3);
+                    div.appendChild(list_group);
+
+
+                    list_questions.appendChild(div);
+                })
+                const submit_quiz = document.getElementById('submit-quiz')
+                let scores = 0;
+                submit_quiz.onclick = function () {
+                    const p = parseFloat(10 / (questions.length));
+                    list_user_answer.forEach(x => {
+                        questions.forEach(y => {
+                            if (x.question_id == y.id) {
+                                if (x.user_answer == y.correct) {
+                                    scores += p
+                                }
+                            }
+                        })
+                    })
+                    const show = document.getElementById('score')
+                    window.scrollTo(0, 0)
+                    show.innerHTML = 'Score: ' + scores
+                    submit_quiz.disabled = true
+                }
+
+            }).catch((error) => {
+                console.log(error);
+            });
+
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>
